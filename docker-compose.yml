@@ -1,0 +1,29 @@
+version: '3'
+services:
+  php:
+    user: www-root
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+    volumes:
+      - ./:/var/www/html/
+    expose:
+      - '9000'
+      - '7072'
+      - '59003'
+    ports:
+      - '5173:5173'
+      - '59003:59003'
+    working_dir: /var/www/html/
+  nginx:
+    image: nginx:alpine
+    ports:
+      - '8110:8110'
+    volumes:
+      - ./.docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./.docker/nginx/site.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./public:/var/www/html/public
+      - ./storage:/var/www/html/storage
+    depends_on:
+      - php

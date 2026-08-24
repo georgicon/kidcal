@@ -1,0 +1,21 @@
+{
+  "name": "KidCal",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "php",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "onecentlin.laravel5-snippets",
+        "xdebug.php-debug",
+        "open-southeners.laravel-pint",
+        "openai.chatgpt"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "php.validate.executablePath": "/usr/local/bin/php"
+      }
+    }
+  },
+  "workspaceFolder": "/var/www/html/"
+}
