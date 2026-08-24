@@ -1,7 +1,10 @@
 <x-layouts::public :title="$calendar->name">
     <header class="border-b border-black/10 bg-[#173f35] text-white">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <a href="{{ route('home') }}" class="font-semibold tracking-tight">GatherCal</a>
+            <a href="{{ route('home') }}" class="flex items-center gap-2 font-semibold tracking-tight">
+                <x-app-logo-icon class="size-6" />
+                KidCal
+            </a>
             @auth
                 @can('update', $calendar)
                     <a href="{{ route('calendars.edit', $calendar) }}" class="rounded-full bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20">Edit calendar</a>
@@ -15,11 +18,11 @@
     <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div class="max-w-3xl">
-            <p class="mb-3 text-xs font-bold uppercase tracking-[0.24em] text-orange-700">Public calendar</p>
-            <h1 class="font-serif text-4xl font-bold tracking-tight text-[#173f35] sm:text-5xl">{{ $calendar->name }}</h1>
-            @if ($calendar->description)
-                <p class="mt-4 text-lg leading-8 text-zinc-600">{{ $calendar->description }}</p>
-            @endif
+                <p class="mb-3 text-xs font-bold uppercase tracking-[0.24em] text-orange-700">Public calendar</p>
+                <h1 class="font-serif text-4xl font-bold tracking-tight text-[#173f35] sm:text-5xl">{{ $calendar->name }}</h1>
+                @if ($calendar->description)
+                    <p class="mt-4 text-lg leading-8 text-zinc-600">{{ $calendar->description }}</p>
+                @endif
             </div>
             @if ($hasEvents)
                 <a href="{{ route('calendars.pdf', $calendar) }}" class="shrink-0 rounded-full bg-[#173f35] px-5 py-3 text-sm font-semibold text-white hover:bg-[#225c4d]">Download PDF</a>
