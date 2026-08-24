@@ -5,25 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\Calendar;
 use App\Models\ManualEvent;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class ManualEventController extends Controller
 {
     public function store(Request $request, Calendar $calendar): RedirectResponse
     {
-        Gate::authorize('update', $calendar);
         $calendar->manualEvents()->create($this->eventAttributes($request, $calendar));
 
         return to_route('calendars.edit', $calendar)->with('status', 'Event added.');
     }
 
-    public function update(Request $request, Calendar $calendar, ManualEvent $event): RedirectResponse
+    public function update(Request $request, Calendar $calendar, ManualEvent $event): JsonResponse|RedirectResponse
     {
         $this->authorizeEvent($calendar, $event);
         $event->update($this->eventAttributes($request, $calendar));
+
+        if ($request->expectsJson()) {
+            return response()->json(['saved' => true]);
+        }
 
         return to_route('calendars.edit', $calendar)->with('status', 'Event updated.');
     }
@@ -74,7 +77,6 @@ class ManualEventController extends Controller
 
     private function authorizeEvent(Calendar $calendar, ManualEvent $event): void
     {
-        Gate::authorize('update', $calendar);
         abort_unless($event->calendar_id === $calendar->id, 404);
     }
 }

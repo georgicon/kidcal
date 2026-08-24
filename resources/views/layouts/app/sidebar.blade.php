@@ -20,7 +20,14 @@
 
             <flux:spacer />
 
-            <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
+            @auth
+                <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
+            @else
+                <div class="hidden rounded-xl border border-zinc-200 bg-white p-3 text-sm lg:block dark:border-zinc-700 dark:bg-zinc-800">
+                    <p class="font-semibold">Shared editor</p>
+                    <p class="mt-1 text-xs text-zinc-500">You can edit this calendar through a private link.</p>
+                </div>
+            @endauth
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
@@ -29,7 +36,8 @@
 
             <flux:spacer />
 
-            <flux:dropdown position="top" align="end">
+            @auth
+                <flux:dropdown position="top" align="end">
                 <flux:profile
                     :initials="auth()->user()->initials()"
                     icon-trailing="chevron-down"
@@ -75,7 +83,10 @@
                         </flux:menu.item>
                     </form>
                 </flux:menu>
-            </flux:dropdown>
+                </flux:dropdown>
+            @else
+                <span class="text-sm font-semibold text-zinc-600">Shared editor</span>
+            @endauth
         </flux:header>
 
         {{ $slot }}

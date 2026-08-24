@@ -61,6 +61,25 @@ class ManualEventTest extends TestCase
         $this->assertNotNull($event->fresh());
     }
 
+    public function test_ad_hoc_event_can_be_autosaved_as_json(): void
+    {
+        $user = User::factory()->create();
+        $calendar = Calendar::factory()->for($user)->create(['timezone' => 'UTC']);
+        $event = $calendar->manualEvents()->create($this->manualEventAttributes());
+
+        $this->actingAs($user)->putJson(route('manual-events.update', [$calendar, $event]), [
+            'title' => 'Autosaved practice',
+            'location' => 'Arena 2',
+            'date' => '2026-09-14',
+            'start_time' => '18:00',
+            'end_time' => '19:00',
+            'all_day' => '0',
+            'color' => '#173f35',
+        ])->assertOk()->assertJson(['saved' => true]);
+
+        $this->assertSame('Autosaved practice', $event->refresh()->title);
+    }
+
     public function test_feed_and_ad_hoc_events_are_sorted_together_by_time(): void
     {
         $calendar = Calendar::factory()->create(['timezone' => 'UTC']);

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'slug', 'description', 'timezone', 'week_starts_on'])]
+#[Fillable(['name', 'slug', 'description', 'timezone', 'week_starts_on', 'editor_token_hash'])]
 class Calendar extends Model
 {
     /** @use HasFactory<CalendarFactory> */

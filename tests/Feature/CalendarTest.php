@@ -29,7 +29,7 @@ class CalendarTest extends TestCase
         $calendar = Calendar::factory()->create();
 
         $this->get(route('calendars.create'))->assertRedirect(route('login'));
-        $this->get(route('calendars.edit', $calendar))->assertRedirect(route('login'));
+        $this->get(route('calendars.edit', $calendar))->assertForbidden();
     }
 
     public function test_owner_can_view_calendar_management_screens(): void
@@ -100,6 +100,21 @@ class CalendarTest extends TestCase
             'slug' => 'stable-link',
             'timezone' => 'Europe/London',
         ]);
+    }
+
+    public function test_calendar_settings_can_be_autosaved_as_json(): void
+    {
+        $user = User::factory()->create();
+        $calendar = Calendar::factory()->for($user)->create();
+
+        $this->actingAs($user)->putJson(route('calendars.update', $calendar), [
+            'name' => 'Autosaved Calendar',
+            'description' => 'Saved without reloading.',
+            'timezone' => 'UTC',
+            'week_starts_on' => 1,
+        ])->assertOk()->assertJson(['saved' => true]);
+
+        $this->assertSame('Autosaved Calendar', $calendar->refresh()->name);
     }
 
     public function test_non_owner_cannot_edit_or_update_a_calendar(): void

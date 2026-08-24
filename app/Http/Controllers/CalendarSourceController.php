@@ -6,9 +6,9 @@ use App\Jobs\SyncCalendarSource;
 use App\Models\Calendar;
 use App\Models\CalendarSource;
 use App\Rules\PublicFeedUrl;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -18,8 +18,6 @@ class CalendarSourceController extends Controller
 {
     public function store(Request $request, Calendar $calendar): RedirectResponse
     {
-        Gate::authorize('update', $calendar);
-
         $validated = $request->validate([
             'links' => ['required', 'string', 'max:100000'],
             'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
@@ -77,7 +75,7 @@ class CalendarSourceController extends Controller
         return to_route('calendars.edit', $calendar)->with('status', $message);
     }
 
-    public function update(Request $request, Calendar $calendar, CalendarSource $source): RedirectResponse
+    public function update(Request $request, Calendar $calendar, CalendarSource $source): JsonResponse|RedirectResponse
     {
         $this->authorizeSource($calendar, $source);
 
@@ -86,6 +84,10 @@ class CalendarSourceController extends Controller
             'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'enabled' => ['required', Rule::in(['0', '1', 0, 1])],
         ]));
+
+        if ($request->expectsJson()) {
+            return response()->json(['saved' => true]);
+        }
 
         return to_route('calendars.edit', $calendar)->with('status', 'Feed settings saved.');
     }
@@ -108,7 +110,6 @@ class CalendarSourceController extends Controller
 
     private function authorizeSource(Calendar $calendar, CalendarSource $source): void
     {
-        Gate::authorize('update', $calendar);
         abort_unless($source->calendar_id === $calendar->id, 404);
     }
 

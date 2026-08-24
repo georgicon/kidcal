@@ -153,6 +153,27 @@ class CalendarSourceTest extends TestCase
         $this->assertNotNull($source->fresh());
     }
 
+    public function test_feed_settings_can_be_autosaved_as_json(): void
+    {
+        $user = User::factory()->create();
+        $calendar = Calendar::factory()->for($user)->create();
+        $source = $calendar->sources()->create([
+            'name' => 'Original feed',
+            'url' => 'https://8.8.8.8/events.ics',
+            'normalized_url' => 'https://8.8.8.8/events.ics',
+            'color' => '#2563eb',
+        ]);
+
+        $this->actingAs($user)->putJson(route('calendar-sources.update', [$calendar, $source]), [
+            'name' => 'Autosaved feed',
+            'color' => '#f97316',
+            'enabled' => '0',
+        ])->assertOk()->assertJson(['saved' => true]);
+
+        $this->assertSame('Autosaved feed', $source->refresh()->name);
+        $this->assertFalse($source->enabled);
+    }
+
     public function test_source_must_belong_to_the_calendar_in_the_route(): void
     {
         $user = User::factory()->create();

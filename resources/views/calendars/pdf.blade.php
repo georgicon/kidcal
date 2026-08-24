@@ -9,12 +9,12 @@
             .month-page { height: 7.7in; overflow: hidden; page-break-after: always; page-break-inside: avoid; }
             .month-page:last-child { page-break-after: avoid; }
             .month-header { height: 0.52in; padding: 0.02in 0.06in 0.05in; }
-            .calendar-name { color: #95621d; font-size: 7pt; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; }
-            h1 { margin: 2px 0 0; color: #173f35; font-family: Georgia, serif; font-size: 20pt; line-height: 1; }
+            .calendar-name { color: #db2777; font-size: 7pt; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; }
+            h1 { margin: 2px 0 0; color: #243b93; font-family: Georgia, serif; font-size: 20pt; line-height: 1; }
             .timezone { float: right; margin-top: -18px; color: #59635f; font-size: 7pt; }
             table { width: 100%; height: 7.05in; border-collapse: collapse; table-layout: fixed; page-break-inside: avoid; }
             thead tr { height: 0.25in; }
-            th { height: 0.25in; border: 0.5px solid #aeb8b3; background: #e8ede8; color: #31423b; font-size: 7pt; letter-spacing: 0.8px; text-transform: uppercase; }
+            th { height: 0.25in; border: 0.5px solid #b8c2dd; background: #eef4ff; color: #243b93; font-size: 7pt; letter-spacing: 0.8px; text-transform: uppercase; }
             tbody tr { height: 1.08in; page-break-inside: avoid; }
             td { height: 1.08in; border: 0.5px solid #aeb8b3; padding: 0; vertical-align: top; overflow: hidden; }
             td.outside { background: #f4f5f3; color: #a0a7a3; }

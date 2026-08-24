@@ -13,9 +13,9 @@
 
         @if ($calendars->isEmpty())
             <div class="relative overflow-hidden rounded-3xl border border-dashed border-zinc-300 bg-zinc-50 px-6 py-16 text-center dark:border-zinc-700 dark:bg-zinc-900">
-                <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500"></div>
+                <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-400 via-pink-500 to-yellow-400"></div>
                 <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700">
-                    <flux:icon.calendar-days class="size-7 text-orange-600" />
+                    <flux:icon.calendar-days class="size-7 text-pink-600" />
                 </div>
                 <flux:heading size="lg">Start with one shared calendar</flux:heading>
                 <flux:text class="mx-auto mt-2 max-w-md">Give it a name and timezone. We’ll add iCal and webcal feeds next.</flux:text>
@@ -26,10 +26,10 @@
                 @foreach ($calendars as $calendar)
                     <article class="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900">
                         <div class="mb-8 flex items-start justify-between gap-4">
-                            <div class="flex size-11 items-center justify-center rounded-xl bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300">
+                            <div class="flex size-11 items-center justify-center rounded-xl bg-pink-50 text-pink-700 dark:bg-pink-950 dark:text-pink-300">
                                 <flux:icon.calendar-days class="size-5" />
                             </div>
-                            <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Public</span>
+                            <span class="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700 dark:bg-sky-950 dark:text-sky-300">Public</span>
                         </div>
                         <flux:heading size="lg">{{ $calendar->name }}</flux:heading>
                         <flux:text class="mt-1 line-clamp-2 min-h-10">{{ $calendar->description ?: 'No description yet.' }}</flux:text>

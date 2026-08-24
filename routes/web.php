@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\CalendarEditorLinkController;
+use App\Http\Controllers\CalendarIcsController;
 use App\Http\Controllers\CalendarPdfController;
 use App\Http\Controllers\CalendarSourceController;
 use App\Http\Controllers\ManualEventController;
@@ -13,6 +15,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('calendars', [CalendarController::class, 'index'])->name('calendars.index');
     Route::get('calendars/create', [CalendarController::class, 'create'])->name('calendars.create');
     Route::post('calendars', [CalendarController::class, 'store'])->name('calendars.store');
+    Route::post('calendars/{calendar}/editor-link', [CalendarEditorLinkController::class, 'store'])->name('calendar-editor.store');
+    Route::delete('calendars/{calendar}/editor-link', [CalendarEditorLinkController::class, 'destroy'])->name('calendar-editor.destroy');
+});
+
+Route::get('calendars/{calendar}/shared-editor/{token}', [CalendarEditorLinkController::class, 'access'])
+    ->name('calendar-editor.access');
+
+Route::middleware('calendar.editor')->group(function () {
     Route::get('calendars/{calendar}/edit', [CalendarController::class, 'edit'])->name('calendars.edit');
     Route::put('calendars/{calendar}', [CalendarController::class, 'update'])->name('calendars.update');
     Route::post('calendars/{calendar}/sources', [CalendarSourceController::class, 'store'])->name('calendar-sources.store');
@@ -25,6 +35,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::get('c/{calendar}', [CalendarController::class, 'show'])->name('calendars.show');
+Route::get('c/{calendar}/calendar.ics', CalendarIcsController::class)->name('calendars.ics');
 Route::get('c/{calendar}/calendar.pdf', CalendarPdfController::class)->name('calendars.pdf');
 
 require __DIR__.'/settings.php';

@@ -6,9 +6,9 @@ use App\Models\Calendar;
 use App\Services\Calendar\CalendarMonthBuilder;
 use Carbon\CarbonImmutable;
 use DateTimeZone;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -42,7 +42,6 @@ class CalendarController extends Controller
 
     public function edit(Calendar $calendar): View
     {
-        Gate::authorize('update', $calendar);
         $calendar->load([
             'sources' => fn ($query) => $query->withCount('events')->latest(),
             'manualEvents' => fn ($query) => $query->orderBy('starts_at'),
@@ -54,10 +53,13 @@ class CalendarController extends Controller
         ]);
     }
 
-    public function update(Request $request, Calendar $calendar): RedirectResponse
+    public function update(Request $request, Calendar $calendar): JsonResponse|RedirectResponse
     {
-        Gate::authorize('update', $calendar);
         $calendar->update($request->validate($this->rules()));
+
+        if ($request->expectsJson()) {
+            return response()->json(['saved' => true]);
+        }
 
         return to_route('calendars.edit', $calendar)
             ->with('status', 'Calendar settings saved.');
