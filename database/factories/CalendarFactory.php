@@ -12,7 +12,7 @@ class CalendarFactory extends Factory
 {
     public function definition(): array
     {
-        $name = fake()->words(3, true);
+        $name = fake()->sentence(3);
 
         return [
             'user_id' => User::factory(),

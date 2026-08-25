@@ -118,7 +118,7 @@ class CalendarSourceController extends Controller
     {
         preg_match_all('/(?:https?|webcal):\/\/[^\s<>"\']+/i', $input, $matches);
 
-        return collect($matches[0] ?? [])
+        return collect($matches[0])
             ->map(fn (string $url) => rtrim($url, ',.;)]}'))
             ->filter()
             ->unique()

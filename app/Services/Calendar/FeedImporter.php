@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use RuntimeException;
+use Sabre\VObject\Component\VCalendar;
 use Sabre\VObject\Component\VEvent;
+use Sabre\VObject\Property\ICalendar\DateTime as DateTimeProperty;
 use Sabre\VObject\Reader;
 
 class FeedImporter
@@ -43,13 +45,18 @@ class FeedImporter
 
         try {
             $calendar = Reader::read($response->body());
+
+            if (! $calendar instanceof VCalendar) {
+                throw new RuntimeException('The feed root must be a VCALENDAR component.');
+            }
+
             $expanded = $calendar->expand($windowStart, $windowEnd);
         } catch (\Throwable $exception) {
             throw new RuntimeException('The feed is not valid iCalendar data.', previous: $exception);
         }
 
         $events = [];
-        foreach ($expanded->VEVENT as $event) {
+        foreach ($expanded->getComponents() as $event) {
             if (! $event instanceof VEvent || strtoupper((string) ($event->STATUS ?? '')) === 'CANCELLED') {
                 continue;
             }
@@ -147,8 +154,14 @@ class FeedImporter
     /** @return array<string, mixed> */
     private function normalizeEvent(VEvent $event): array
     {
-        $startsAt = CarbonImmutable::instance($event->DTSTART->getDateTime())->utc();
-        $allDay = ! $event->DTSTART->hasTime();
+        $start = $this->dateTimeProperty($event, 'DTSTART');
+
+        if (! $start) {
+            throw new RuntimeException('Calendar event is missing a valid DTSTART property.');
+        }
+
+        $startsAt = CarbonImmutable::instance($start->getDateTime())->utc();
+        $allDay = ! $start->hasTime();
 
         if (isset($event->DTEND)) {
             $endsAt = CarbonImmutable::instance($event->DTEND->getDateTime())->utc();
@@ -174,6 +187,17 @@ class FeedImporter
             'created_at' => now(),
             'updated_at' => now(),
         ];
+    }
+
+    private function dateTimeProperty(VEvent $event, string $name): ?DateTimeProperty
+    {
+        foreach ($event->select($name) as $property) {
+            if ($property instanceof DateTimeProperty) {
+                return $property;
+            }
+        }
+
+        return null;
     }
 
     private function nullableText(mixed $value): ?string
