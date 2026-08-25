@@ -93,4 +93,25 @@ class CalendarIcsTest extends TestCase
             ->assertSee('Subscribe in calendar app')
             ->assertSee(preg_replace('/^https?:/', 'webcal:', route('calendars.ics', $calendar)), false);
     }
+
+    public function test_recurring_manual_occurrences_have_unique_ical_uids(): void
+    {
+        $calendar = Calendar::factory()->create(['slug' => 'practice', 'timezone' => 'UTC']);
+        $event = $calendar->manualEvents()->create([
+            'title' => 'Practice',
+            'starts_at' => CarbonImmutable::parse('2026-09-01 18:00', 'UTC'),
+            'ends_at' => CarbonImmutable::parse('2026-09-01 19:00', 'UTC'),
+            'all_day' => false,
+            'color' => '#3157d5',
+            'recurrence_type' => 'daily',
+            'recurrence_interval' => 1,
+            'recurrence_until' => '2026-09-02',
+        ]);
+
+        $ical = $this->get(route('calendars.ics', $calendar))->getContent();
+
+        $this->assertStringContainsString("UID:manual-{$event->id}-20260901T180000Z@practice.kidcal", $ical);
+        $this->assertStringContainsString("UID:manual-{$event->id}-20260902T180000Z@practice.kidcal", $ical);
+        $this->assertSame(2, substr_count($ical, 'BEGIN:VEVENT'));
+    }
 }

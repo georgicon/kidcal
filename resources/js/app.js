@@ -94,3 +94,26 @@ document.addEventListener('submit', (event) => {
         scheduleAutosave(form, 0);
     }
 });
+
+function updateRecurrenceFields(form) {
+    const type = form.querySelector('[data-recurrence-type]')?.value;
+
+    form.querySelectorAll('[data-recurrence-options]').forEach((element) => {
+        element.hidden = !type;
+        element.querySelectorAll('input').forEach((input) => { input.disabled = !type; });
+    });
+
+    form.querySelectorAll('[data-weekday-options]').forEach((element) => {
+        const weekly = type === 'weekly';
+        element.hidden = !weekly;
+        element.querySelectorAll('input').forEach((input) => { input.disabled = !weekly; });
+    });
+}
+
+document.querySelectorAll('[data-recurrence-form]').forEach(updateRecurrenceFields);
+
+document.addEventListener('change', (event) => {
+    if (event.target.matches('[data-recurrence-type]')) {
+        updateRecurrenceFields(event.target.closest('[data-recurrence-form]'));
+    }
+});

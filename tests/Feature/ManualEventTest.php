@@ -117,6 +117,91 @@ class ManualEventTest extends TestCase
         $this->assertTrue(strpos($html, 'Early manual event') < strpos($html, 'Later feed event'));
     }
 
+    public function test_weekly_event_can_repeat_on_multiple_weekdays(): void
+    {
+        $user = User::factory()->create();
+        $calendar = Calendar::factory()->for($user)->create(['timezone' => 'America/Toronto']);
+
+        $this->actingAs($user)->post(route('manual-events.store', $calendar), [
+            'title' => 'Swim practice',
+            'location' => 'Pool',
+            'date' => '2026-09-07',
+            'start_time' => '18:00',
+            'end_time' => '19:00',
+            'all_day' => '0',
+            'color' => '#3157d5',
+            'recurrence_type' => 'weekly',
+            'recurrence_interval' => '1',
+            'recurrence_weekdays' => ['1', '3'],
+            'recurrence_until' => '2026-09-16',
+        ])->assertRedirect(route('calendars.edit', $calendar));
+
+        $event = ManualEvent::sole();
+        $this->assertSame([1, 3], $event->recurrence_weekdays);
+
+        $occurrences = app(CalendarMonthBuilder::class)->events($calendar)
+            ->map(fn ($occurrence) => $occurrence->starts_at->setTimezone($calendar->timezone)->format('Y-m-d H:i'));
+
+        $this->assertSame([
+            '2026-09-07 18:00',
+            '2026-09-09 18:00',
+            '2026-09-14 18:00',
+            '2026-09-16 18:00',
+        ], $occurrences->all());
+    }
+
+    public function test_daily_monthly_and_yearly_intervals_expand_to_occurrences(): void
+    {
+        $calendar = Calendar::factory()->create(['timezone' => 'UTC']);
+
+        $daily = $calendar->manualEvents()->create([
+            ...$this->manualEventAttributes(),
+            'starts_at' => CarbonImmutable::parse('2026-01-01 09:00', 'UTC'),
+            'ends_at' => CarbonImmutable::parse('2026-01-01 10:00', 'UTC'),
+            'recurrence_type' => 'daily',
+            'recurrence_interval' => 2,
+            'recurrence_until' => '2026-01-05',
+        ]);
+        $monthly = $calendar->manualEvents()->create([
+            ...$this->manualEventAttributes(),
+            'starts_at' => CarbonImmutable::parse('2026-01-31 09:00', 'UTC'),
+            'ends_at' => CarbonImmutable::parse('2026-01-31 10:00', 'UTC'),
+            'recurrence_type' => 'monthly',
+            'recurrence_interval' => 1,
+            'recurrence_until' => '2026-03-31',
+        ]);
+        $yearly = $calendar->manualEvents()->create([
+            ...$this->manualEventAttributes(),
+            'starts_at' => CarbonImmutable::parse('2024-02-29 09:00', 'UTC'),
+            'ends_at' => CarbonImmutable::parse('2024-02-29 10:00', 'UTC'),
+            'recurrence_type' => 'yearly',
+            'recurrence_interval' => 1,
+            'recurrence_until' => '2028-03-01',
+        ]);
+
+        $occurrences = app(CalendarMonthBuilder::class)->events($calendar)->groupBy('id');
+
+        $this->assertSame(['2026-01-01', '2026-01-03', '2026-01-05'], $occurrences[$daily->id]->pluck('starts_at')->map->format('Y-m-d')->all());
+        $this->assertSame(['2026-01-31', '2026-03-31'], $occurrences[$monthly->id]->pluck('starts_at')->map->format('Y-m-d')->all());
+        $this->assertSame(['2024-02-29', '2028-02-29'], $occurrences[$yearly->id]->pluck('starts_at')->map->format('Y-m-d')->all());
+    }
+
+    public function test_recurring_event_requires_an_end_date_and_weekly_days(): void
+    {
+        $calendar = Calendar::factory()->create();
+
+        $this->actingAs($calendar->user)->post(route('manual-events.store', $calendar), [
+            'title' => 'Practice',
+            'date' => '2026-09-07',
+            'start_time' => '18:00',
+            'end_time' => '19:00',
+            'all_day' => '0',
+            'color' => '#3157d5',
+            'recurrence_type' => 'weekly',
+            'recurrence_interval' => '1',
+        ])->assertInvalid(['recurrence_weekdays', 'recurrence_until']);
+    }
+
     /** @return array<string, mixed> */
     private function manualEventAttributes(): array
     {

@@ -50,6 +50,11 @@ class ManualEventController extends Controller
             'end_time' => ['nullable', 'date_format:H:i'],
             'all_day' => ['required', Rule::in(['0', '1', 0, 1])],
             'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'recurrence_type' => ['nullable', Rule::in(['daily', 'weekly', 'monthly', 'yearly'])],
+            'recurrence_interval' => ['required_with:recurrence_type', 'integer', 'min:1', 'max:52'],
+            'recurrence_weekdays' => ['required_if:recurrence_type,weekly', 'array'],
+            'recurrence_weekdays.*' => ['integer', 'between:0,6', 'distinct'],
+            'recurrence_until' => ['required_with:recurrence_type', 'nullable', 'date_format:Y-m-d', 'after_or_equal:date'],
         ]);
 
         $allDay = (bool) $validated['all_day'];
@@ -72,6 +77,12 @@ class ManualEventController extends Controller
             'ends_at' => $endsAt->utc(),
             'all_day' => $allDay,
             'color' => $validated['color'],
+            'recurrence_type' => $validated['recurrence_type'] ?? null,
+            'recurrence_interval' => $validated['recurrence_interval'] ?? 1,
+            'recurrence_weekdays' => ($validated['recurrence_type'] ?? null) === 'weekly'
+                ? array_map(intval(...), array_values($validated['recurrence_weekdays']))
+                : null,
+            'recurrence_until' => $validated['recurrence_until'] ?? null,
         ];
     }
 

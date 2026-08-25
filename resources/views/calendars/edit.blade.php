@@ -78,7 +78,7 @@
                 <flux:text class="mt-1">Add events that do not belong to any imported feed.</flux:text>
             </div>
 
-            <form method="POST" action="{{ route('manual-events.store', $calendar) }}" class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <form method="POST" action="{{ route('manual-events.store', $calendar) }}" data-recurrence-form class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
                 @csrf
                 <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-[1.3fr_1fr_auto_auto_auto_auto] xl:items-end">
                     <flux:input name="title" label="Event name" :value="old('title')" required maxlength="200" />
@@ -91,6 +91,7 @@
                         <input id="event-color" type="color" name="color" value="{{ old('color', '#3157d5') }}" class="h-10 w-16 cursor-pointer rounded-lg border border-zinc-300 bg-white p-1 dark:border-zinc-600 dark:bg-zinc-800">
                     </div>
                 </div>
+                @include('calendars.partials.recurrence-fields', ['event' => null, 'fieldId' => 'new'])
                 <div class="mt-4 flex items-center justify-between gap-4">
                     <div>
                         <input type="hidden" name="all_day" value="0">
@@ -111,26 +112,29 @@
                             $localEnd = $event->ends_at->setTimezone($calendar->timezone);
                         @endphp
                         <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-                            <form method="POST" action="{{ route('manual-events.update', [$calendar, $event]) }}" data-autosave class="grid gap-4 md:grid-cols-2 xl:grid-cols-[1.3fr_1fr_auto_auto_auto_auto_auto] xl:items-end">
+                            <form method="POST" action="{{ route('manual-events.update', [$calendar, $event]) }}" data-autosave data-recurrence-form>
                                 @csrf
                                 @method('PUT')
-                                <flux:input name="title" label="Event name" :value="$event->title" required maxlength="200" />
-                                <flux:input name="location" label="Location" :value="$event->location" maxlength="200" />
-                                <flux:input type="date" name="date" label="Date" :value="$localStart->format('Y-m-d')" required />
-                                <flux:input type="time" name="start_time" label="Starts" :value="$localStart->format('H:i')" />
-                                <flux:input type="time" name="end_time" label="Ends" :value="$localEnd->format('H:i')" />
-                                <div>
-                                    <label for="event-color-{{ $event->id }}" class="mb-2 block text-sm font-medium">Color</label>
-                                    <input id="event-color-{{ $event->id }}" type="color" name="color" value="{{ $event->color }}" class="h-10 w-16 cursor-pointer rounded-lg border border-zinc-300 bg-white p-1 dark:border-zinc-600 dark:bg-zinc-800">
+                                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-[1.3fr_1fr_auto_auto_auto_auto_auto] xl:items-end">
+                                    <flux:input name="title" label="Event name" :value="$event->title" required maxlength="200" />
+                                    <flux:input name="location" label="Location" :value="$event->location" maxlength="200" />
+                                    <flux:input type="date" name="date" label="Date" :value="$localStart->format('Y-m-d')" required />
+                                    <flux:input type="time" name="start_time" label="Starts" :value="$localStart->format('H:i')" />
+                                    <flux:input type="time" name="end_time" label="Ends" :value="$localEnd->format('H:i')" />
+                                    <div>
+                                        <label for="event-color-{{ $event->id }}" class="mb-2 block text-sm font-medium">Color</label>
+                                        <input id="event-color-{{ $event->id }}" type="color" name="color" value="{{ $event->color }}" class="h-10 w-16 cursor-pointer rounded-lg border border-zinc-300 bg-white p-1 dark:border-zinc-600 dark:bg-zinc-800">
+                                    </div>
+                                    <div class="pb-2">
+                                        <input type="hidden" name="all_day" value="0">
+                                        <label class="flex items-center gap-2 text-sm">
+                                            <input type="checkbox" name="all_day" value="1" @checked($event->all_day) class="rounded border-zinc-300">
+                                            All day
+                                        </label>
+                                    </div>
                                 </div>
-                                <div class="pb-2">
-                                    <input type="hidden" name="all_day" value="0">
-                                    <label class="flex items-center gap-2 text-sm">
-                                        <input type="checkbox" name="all_day" value="1" @checked($event->all_day) class="rounded border-zinc-300">
-                                        All day
-                                    </label>
-                                </div>
-                                <div class="md:col-span-2 xl:col-span-7 flex justify-end border-t border-zinc-100 pt-3 dark:border-zinc-800">
+                                @include('calendars.partials.recurrence-fields', ['fieldId' => 'event-'.$event->id])
+                                <div class="mt-4 flex justify-end border-t border-zinc-100 pt-3 dark:border-zinc-800">
                                     <p data-autosave-status role="status" aria-live="polite" class="text-sm text-zinc-500">Changes save automatically</p>
                                 </div>
                             </form>

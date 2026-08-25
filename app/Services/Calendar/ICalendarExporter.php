@@ -72,8 +72,10 @@ class ICalendarExporter
     private function uid(Calendar $calendar, mixed $event): string
     {
         $type = $event instanceof ManualEvent ? 'manual' : 'source';
+        $occurrence = $event instanceof ManualEvent ? ($event->occurrence_key ?? null) : null;
+        $suffix = $occurrence ? "-{$occurrence}" : '';
 
-        return "{$type}-{$event->getKey()}@{$calendar->slug}.kidcal";
+        return "{$type}-{$event->getKey()}{$suffix}@{$calendar->slug}.kidcal";
     }
 
     private function utc(CarbonInterface $date): string
